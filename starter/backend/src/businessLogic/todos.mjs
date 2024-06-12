@@ -41,3 +41,9 @@ export async function deleteTodo(event) {
   const userId = getUserId(event)
   await todoAccess.deleteTodo(todoId, userId)
 }
+
+export async function generateUploadUrl(event) {
+  console.log('Processing event: ', event)
+  const todoId = event.pathParameters.todoId
+  return await todoAccess.generateUploadUrl(todoId)
+}
