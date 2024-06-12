@@ -1,24 +1,17 @@
 import { DynamoDB } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { S3Client } from '@aws-sdk/client-s3'
 import AWSXRay from 'aws-xray-sdk-core'
 
 export class TodoAccess {
   constructor(
     documentClient = AWSXRay.captureAWSv3Client(new DynamoDB()),
-    s3Client = new S3Client(),
     todosTable = process.env.TODOS_TABLE,
-    userIdIndex = process.env.USER_ID_INDEX,
-    bucketName = process.env.IMAGES_S3_BUCKET,
-    urlExpiration = parseInt(process.env.SIGNED_URL_EXPIRATION)
+    userIdIndex = process.env.USER_ID_INDEX
   ) {
     this.documentClient = documentClient
-    this.s3Client = s3Client
     this.todosTable = todosTable
     this.userIdIndex = userIdIndex
-    this.bucketName = bucketName
-    this.urlExpiration = urlExpiration
     this.dynamoDbClient = DynamoDBDocument.from(this.documentClient)
   }
 
@@ -90,16 +83,5 @@ export class TodoAccess {
         userId: userId
       }
     })
-  }
-
-  async generateUploadUrl(todoId) {
-    const command = new PutObjectCommand({
-      Bucket: this.bucketName,
-      Key: todoId
-    })
-    const url = await getSignedUrl(this.s3Client, command, {
-      expiresIn: this.urlExpiration
-    })
-    return url
   }
 }

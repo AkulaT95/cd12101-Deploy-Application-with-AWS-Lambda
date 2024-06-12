@@ -1,8 +1,11 @@
 import { TodoAccess } from '../dataLayer/todoAccess.mjs'
+import { ImageAccess } from '../fileStorage/images.mjs'
 import { getUserId } from '../lambda/utils.mjs'
 import { v4 as uuidv4 } from 'uuid'
 
 const todoAccess = new TodoAccess()
+const imageAccess = new ImageAccess()
+const bucketName = process.env.IMAGES_S3_BUCKET
 
 export async function getTodos(event) {
   console.log('Processing event: ', event)
@@ -19,6 +22,7 @@ export async function createTodo(event) {
     todoId,
     userId,
     done: false,
+    attachmentUrl: `https://${bucketName}.s3.amazonaws.com/${todoId}`,
     createdAt: new Date(Date.now()).toISOString(),
     ...parsedBody
   }
@@ -45,5 +49,5 @@ export async function deleteTodo(event) {
 export async function generateUploadUrl(event) {
   console.log('Processing event: ', event)
   const todoId = event.pathParameters.todoId
-  return await todoAccess.generateUploadUrl(todoId)
+  return await imageAccess.generateUploadUrl(todoId)
 }
