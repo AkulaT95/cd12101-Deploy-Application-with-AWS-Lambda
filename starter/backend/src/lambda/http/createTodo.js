@@ -16,6 +16,8 @@ export const handler = middy()
 
     return {
       statusCode: 201,
-      body: JSON.stringify(todo)
+      body: JSON.stringify({
+        item: todo
+      })
     }
   })
