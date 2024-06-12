@@ -1,8 +1,21 @@
+import middy from '@middy/core'
+import cors from '@middy/http-cors'
+import httpErrorHandler from '@middy/http-error-handler'
+import { createTodo } from '../../businessLogic/todos.mjs'
 
-export function handler(event) {
-  const newTodo = JSON.parse(event.body)
+export const handler = middy()
+  .use(httpErrorHandler())
+  .use(
+    cors({
+      credentials: true
+    })
+  )
+  .handler(async (event) => {
+    console.log('Caller event', event)
+    const todo = await createTodo(event)
 
-  // TODO: Implement creating a new TODO item
-  return undefined
-}
-
+    return {
+      statusCode: 201,
+      body: JSON.stringify(todo)
+    }
+  })

@@ -15,7 +15,7 @@ export class TodoAccess {
   }
 
   async getTodosByUserId(userId) {
-    console.log('Getting todos by userId')
+    console.log(`Getting todos with userId ${userId}`)
 
     const params = {
       TableName: this.todosTable,
@@ -34,4 +34,52 @@ export class TodoAccess {
     return result.Items
   }
 
+  async createTodo(todo) {
+    console.log(`Creating a todo with todoId ${todo.todoId}`)
+
+    await this.dynamoDbClient.put({
+      TableName: this.todosTable,
+      Item: todo
+    })
+
+    return todo
+  }
+
+  async updateTodo(updateObj, todoId, userId) {
+    console.log(`Updating a todo with todoId ${todoId}`)
+
+    const { name, dueDate, done } = updateObj
+    const params = {
+      TableName: this.todosTable,
+      Key: {
+        todoId: todoId,
+        userId: userId
+      },
+      UpdateExpression: 'set #name = :nameValue, #dueDate = :dueDateValue, #done = :doneValue',
+      ExpressionAttributeNames: {
+        '#name': 'name',
+        '#dueDate': 'dueDate',
+        '#done': 'done'
+      },
+      ExpressionAttributeValues: {
+        ':nameValue': name,
+        ':dueDateValue': dueDate,
+        ':doneValue': done
+      },
+      ReturnValues: 'UPDATED_NEW'
+    }
+    await this.dynamoDbClient.update(params)
+  }
+
+  async deleteTodo(todoId, userId) {
+    console.log(`Deleting a todo with todoId ${todoId}`)
+
+    await this.dynamoDbClient.delete({
+      TableName: this.todosTable,
+      Key: {
+        todoId: todoId,
+        userId: userId
+      }
+    })
+  }
 }
